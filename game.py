@@ -127,16 +127,17 @@ class SnakeGame:
         elif self.snake[0][1] < 0 or self.snake[0][1] >= self.env.shape[1]:
             return GameState.GAMEOVER
         self._buffer = np.zeros(self.env.shape, dtype=int)
-        self._update_snake(self._buffer)
         self._update_back_buffer()
 
         if self._get_buffer(self.env, self.snake[0]) == Env.APPLE_GREEN.value:
             self._grow_snake(self.env)
+            self._update_snake(self._buffer)
             self._points += 1
             self._spawn_obj(Env.APPLE_GREEN, self._buffer)
         elif self._get_buffer(self.env, self.snake[0]) == Env.APPLE_RED.value:
             self._set_buffer(self._buffer, self.snake[-1], Env.EMPTY)
             self.snake = self.snake[:-1]
+            self._update_snake(self._buffer)
             self._points -= 1
             self._spawn_obj(Env.APPLE_RED, self._buffer)
         elif self._get_buffer(self.env, self.snake[0]) == Env.SNAKE_BODY.value:
