@@ -140,13 +140,14 @@ class SnakeGame:
         elif self._get_buffer(self.env, self.snake[0]) == Env.APPLE_RED.value:
             self._set_buffer(self._buffer, self.snake[-1], Env.EMPTY)
             self.snake = self.snake[:-1]
+            if self.snake.size == 0:
+                return GameState.GAMEOVER
             self._update_snake(self._buffer)
             self._points -= 1
             self._spawn_obj(Env.APPLE_RED, self._buffer)
             state = GameState.LOSE_POINT
         elif self._get_buffer(self.env, self.snake[0]) == Env.SNAKE_BODY.value:
             return GameState.GAMEOVER
-
         self._update_snake(self._buffer)
         self.env = self._buffer
         return state
