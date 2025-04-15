@@ -26,12 +26,22 @@ class GameState(Enum):
     LOSE_POINT = 3
 
 
+def state_to_reward(next_state: GameState) -> int:
+    if next_state == GameState.OK:
+        return -25
+    if next_state == GameState.GAMEOVER:
+        return -100
+    if next_state == GameState.GAIN_POINT:
+        return 50
+    if next_state == GameState.LOSE_POINT:
+        return -50
+
+
 class SnakeGame:
     def __init__(self, w: int, h: int, red: int = 2, green: int = 1) -> None:
         self.env = np.ndarray = None
         self._buffer = np.ndarray = None
         self.snake = np.ndarray = None
-        self._points: int = 0
         self.reset(w, h)
 
     def _get_random_coords(self) -> np.ndarray:
@@ -98,7 +108,6 @@ class SnakeGame:
     def reset(
         self, w: int, h: int, red: int = 2, green: int = 1, length: int = 2
     ) -> None:
-        self.points = 0
         self.env = np.zeros((w, h), dtype=int)
         self._buffer = np.zeros(self.env.shape, dtype=int)
         for _ in range(red):
@@ -134,7 +143,6 @@ class SnakeGame:
         if self._get_buffer(self.env, self.snake[0]) == Env.APPLE_GREEN.value:
             self._grow_snake(self.env)
             self._update_snake(self._buffer)
-            self._points += 1
             self._spawn_obj(Env.APPLE_GREEN, self._buffer)
             state = GameState.GAIN_POINT
         elif self._get_buffer(self.env, self.snake[0]) == Env.APPLE_RED.value:
@@ -143,7 +151,6 @@ class SnakeGame:
             if self.snake.size == 0:
                 return GameState.GAMEOVER
             self._update_snake(self._buffer)
-            self._points -= 1
             self._spawn_obj(Env.APPLE_RED, self._buffer)
             state = GameState.LOSE_POINT
         elif self._get_buffer(self.env, self.snake[0]) == Env.SNAKE_BODY.value:
