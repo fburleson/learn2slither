@@ -94,7 +94,9 @@ class Agent:
         q_target: torch.Tensor = self._target_net.forward(batch[3]).max(
             dim=1, keepdims=True
         )[0]
-        targets: torch.Tensor = batch[2] + discount * q_target * (1 - batch[4])
+        targets: torch.Tensor = batch[2].unsqueeze(-1) + discount * q_target * (
+            1 - batch[4].unsqueeze(-1)
+        )
         action_q_values: torch.Tensor = torch.gather(
             self._net.forward(batch[0]), 1, batch[1].unsqueeze(-1)
         )
