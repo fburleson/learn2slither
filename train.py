@@ -1,4 +1,7 @@
 import torch
+import pygame
+from pygame import Surface
+from visual import render_game
 from agent import Agent
 from env import Environment
 from defs import Action, QReward
@@ -13,6 +16,9 @@ def train(
     epsilon_start: float = 0.9,
     epsilon_end: float = 0.05,
     epsilon_decay: float = 0.99999,
+    visual: bool = False,
+    screen: Surface = None,
+    refresh_rate: float = 200,
 ) -> None:
     iteration: int = 0
     episode_total_reward: int = 0
@@ -24,6 +30,7 @@ def train(
         reward: QReward = env.step(action)
         if reward == QReward.DEAD:
             env.reset(env.w, env.h)
+            print(episode_total_reward)
             episode_total_reward = 0
         next_obs = agent.observe(env)
         agent.store_transition(obs, action, reward, next_obs, reward == QReward.DEAD)
@@ -36,9 +43,21 @@ def train(
             if iteration % min_transitions == 0:
                 agent.sync()
             iteration += 1
+            if visual:
+                screen.fill((0, 0, 0))
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        return
+                render: Surface = render_game(10, env.get_env())
+                screen.blit(render, (0, 0))
+                pygame.display.flip()
+                pygame.time.wait(refresh_rate)
 
 
 if __name__ == "__main__":
+    pygame.init()
+    screen: Surface = pygame.display.set_mode((120, 120))
     env: Environment = Environment(10, 10)
     agent: Agent = Agent(env, lr=0.001, memory_size=100_000)
-    train(env, agent)
+    train(env, agent, visual=True, screen=screen, refresh_rate=100)
+    pygame.quit()
