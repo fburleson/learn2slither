@@ -67,12 +67,16 @@ class Environment:
         self._env = np.where(
             self._env == EnvID.SNAKE_BODY.value, EnvID.EMPTY.value, self._env
         )
-        self._set_cell(self.snake[0][0], self.snake[0][1], EnvID.SNAKE_HEAD)
+        self._env = np.where(
+            self._env == EnvID.SNAKE_HEAD.value, EnvID.EMPTY.value, self._env
+        )
+        if self.snake.shape[0] != 0:
+            self._set_cell(self.snake[0][0], self.snake[0][1], EnvID.SNAKE_HEAD)
         for body_segment in self.snake[1:]:
             self._set_cell(body_segment[0], body_segment[1], EnvID.SNAKE_BODY)
 
     def _update_snake_body(self) -> None:
-        for i in range(len(self.snake) - 1):
+        for i in range(self.snake.shape[0] - 1):
             idx: int = -(i + 1)
             self.snake[idx] = self.snake[idx - 1]
 
@@ -109,14 +113,17 @@ class Environment:
             self.snake[0] += np.array([1, 0])
         if not self._check_collision(EnvID.EMPTY):
             if self._check_collision(EnvID.APPLE_RED):
-                self.snake = self.snake[:-1]
-                self._set_cell(self.snake[0], self.snake[1], EnvID.EMPTY)
+                self._set_cell(self.snake[0][0], self.snake[0][1], EnvID.EMPTY)
                 self.spawn_obj(EnvID.APPLE_RED)
-                reward = QReward.LOSE
+                self.snake = self.snake[:-1]
+                if self.snake.shape[0] == 0:
+                    reward = QReward.DEAD
+                else:
+                    reward = QReward.LOSE
             elif self._check_collision(EnvID.APPLE_GREEN):
-                self._extend_snake()
-                self._set_cell(self.snake[0], self.snake[1], EnvID.EMPTY)
+                self._set_cell(self.snake[0][0], self.snake[0][1], EnvID.EMPTY)
                 self.spawn_obj(EnvID.APPLE_GREEN)
+                self._extend_snake()
                 reward = QReward.GAIN
             elif self._check_collision(EnvID.WALL) or self._check_collision(
                 EnvID.SNAKE_BODY

@@ -56,15 +56,13 @@ class Agent:
         )
         return torch.as_tensor([*horizontal, *vertical], dtype=torch.float32)
 
-    def policy_greedy(self, state: torch.Tensor) -> Action:
-        return self._actions[torch.argmax(self._net.forward(state))]
+    def policy_greedy(self, obs: torch.Tensor) -> Action:
+        return self._actions[torch.argmax(self._net.forward(obs))]
 
-    def policy_epsilon_greedy(
-        self, state: torch.Tensor, epsilon: float = 0.1
-    ) -> Action:
+    def policy_epsilon_greedy(self, obs: torch.Tensor, epsilon: float = 0.1) -> Action:
         if random.random() < epsilon:
             return random.choice(self._actions)
-        return self.policy_greedy(state)
+        return self.policy_greedy(obs)
 
     def store_transition(
         self,
