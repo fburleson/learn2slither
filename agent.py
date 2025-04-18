@@ -12,11 +12,11 @@ class DQN(nn.Module):
     def __init__(self, state_size: int, n_actions: int):
         super().__init__()
         self.net: nn.Sequential = nn.Sequential(
-            nn.Linear(state_size, 512),
+            nn.Linear(state_size, 64),
             nn.ReLU(),
-            nn.Linear(512, 512),
+            nn.Linear(64, 64),
             nn.ReLU(),
-            nn.Linear(512, n_actions),
+            nn.Linear(64, n_actions),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -32,10 +32,10 @@ class Agent:
             Action.RIGHT,
         )
         self._reward_map: dict = {
-            QReward.OK: -1,
+            QReward.OK: -2.5,
             QReward.DEAD: -100,
-            QReward.LOSE: -2,
-            QReward.GAIN: 2,
+            QReward.LOSE: -90,
+            QReward.GAIN: 1000,
         }
         self._obs_map: dict = {
             EnvID.WALL.value: 0,
@@ -60,9 +60,10 @@ class Agent:
 
     def _observe_dir(self, dir: np.ndarray) -> np.ndarray:
         dir_obs: np.ndarray = np.zeros(len(self._obs_map), dtype=int)
-        for cell in dir:
+        for cell_idx in range(len(dir)):
+            cell: int = dir[cell_idx]
             if cell != EnvID.EMPTY.value:
-                dir_obs[self._obs_map[cell]] = 1
+                dir_obs[self._obs_map[cell]] = cell_idx + 1
                 return dir_obs
 
     def observe(self, env: Environment) -> torch.Tensor:
