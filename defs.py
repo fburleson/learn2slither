@@ -22,3 +22,8 @@ class QReward(Enum):
     DEAD = 1
     GAIN = 2
     LOSE = 3
+
+
+class RunModes(Enum):
+    TRAIN = 0
+    PLAY = 1

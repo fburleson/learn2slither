@@ -1,4 +1,5 @@
 import random
+import pickle
 from collections import deque
 import torch
 from torch import nn
@@ -133,3 +134,15 @@ class Agent:
         self._optimizer.zero_grad()
         loss.backward()
         self._optimizer.step()
+
+    def save(self, file_name: str):
+        with open(file_name, "wb") as file:
+            pickle.dump(self, file)
+        print(f"saved agent as {file_name}")
+
+
+def load_agent(file_name: str) -> Agent:
+    with open(file_name, "rb") as file:
+        agent: Agent = pickle.load(file)
+    print(f"loaded agent from {file_name}")
+    return agent
