@@ -29,7 +29,9 @@ class Environment:
     def _get_available_cell(self) -> np.ndarray:
         cell: np.ndarray = np.zeros((2), dtype=int)
         while not self._is_available_cell(cell[0], cell[1]):
-            cell = np.random.randint(2, [self.w, self.h])
+            cell[0] = np.random.randint(0, self.w)
+            cell[1] = np.random.randint(0, self.h)
+            # cell = np.random.randint(2, [self.w, self.h])
         return cell
 
     def _spawn_obj(self, id: EnvID) -> None:
