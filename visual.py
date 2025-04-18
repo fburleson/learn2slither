@@ -1,6 +1,6 @@
-import numpy as np
 import pygame
-from pygame import Surface
+import numpy as np
+from env import Environment
 from defs import EnvID
 
 
@@ -19,13 +19,30 @@ def _env_to_color(env: int):
         return np.array([0, 0, 180])
 
 
-def render_game(scale: int, env: np.ndarray) -> Surface:
-    render: Surface = pygame.Surface((env.shape[0], env.shape[1]))
+def _render_env(scale: int, env: Environment) -> pygame.Surface:
+    render: pygame.Surface = pygame.Surface((env.w, env.h))
     pixels: np.ndarray = np.apply_along_axis(
-        lambda x: [_env_to_color(x_i) for x_i in x], 1, env
+        lambda x: [_env_to_color(x_i) for x_i in x], 1, env.get_env()
     )
     pygame.surfarray.blit_array(render, pixels)
-    render = pygame.transform.scale(
-        render, (env.shape[0] * scale, env.shape[1] * scale)
-    )
+    render = pygame.transform.scale(render, (env.h * scale, env.w * scale))
     return render
+
+
+def init_display(env: Environment, scale: int = 10) -> pygame.Surface:
+    pygame.init()
+    return pygame.display.set_mode((env.w * scale, env.h * scale))
+
+
+def render_env_to_screen(
+    screen: pygame.Surface, env: Environment, refresh_rate: int = 200, scale: int = 10
+) -> bool:
+    screen.fill((0, 0, 0))
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            return False
+    render: pygame.Surface = _render_env(scale, env)
+    screen.blit(render, (0, 0))
+    pygame.display.flip()
+    pygame.time.wait(refresh_rate)
+    return True

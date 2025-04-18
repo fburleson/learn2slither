@@ -11,6 +11,7 @@ class Environment:
         self.h = h
         self._env: np.ndarray = None
         self.snake: np.ndarray = None
+        self._dirs: np.ndarray = np.array([[1, 0], [-1, 0], [0, 1], [0, -1]])
         self.reset(w, h)
 
     def get_env(self) -> np.ndarray:
@@ -31,7 +32,7 @@ class Environment:
             cell = np.random.randint(2, [self.w, self.h])
         return cell
 
-    def spawn_obj(self, id: EnvID) -> None:
+    def _spawn_obj(self, id: EnvID) -> None:
         coords: np.ndarray = self._get_available_cell()
         self._set_cell(coords[0], coords[1], id)
 
@@ -44,24 +45,14 @@ class Environment:
         return np.any(np.all(self.snake == target, axis=1))
 
     def _extend_snake(self) -> None:
-        next = np.array(self.snake[-1])
-        if self._is_available_cell(next[0] + 1, next[1]) and not self._is_in_snake(
-            next[0] + 1, next[1]
-        ):
-            next[0] += 1
-        elif self._is_available_cell(next[0] - 1, next[1]) and not self._is_in_snake(
-            next[0] - 1, next[1]
-        ):
-            next[0] -= 1
-        elif self._is_available_cell(next[0], next[1] + 1) and not self._is_in_snake(
-            next[0], next[1] + 1
-        ):
-            next[1] += 1
-        elif self._is_available_cell(next[0], next[1] - 1) and not self._is_in_snake(
-            next[0], next[1] - 1
-        ):
-            next[1] -= 1
-        self.snake = np.append(self.snake, [next], axis=0)
+        np.random.shuffle(self._dirs)
+        for dir in self._dirs:
+            next: np.ndarray = self.snake[-1] + dir
+            if self._is_available_cell(next[0], next[1]) and not self._is_in_snake(
+                next[0], next[1]
+            ):
+                self.snake = np.append(self.snake, [next], axis=0)
+                return
 
     def _snake_to_env(self) -> None:
         self._env = np.where(
@@ -86,15 +77,15 @@ class Environment:
         return False
 
     def reset(self, w: int, h: int) -> None:
-        self._env = np.zeros((h + 2, w + 2), dtype=int)
+        self._env = np.zeros((h, w), dtype=int)
         self._env[0] = EnvID.WALL.value
-        self._env[h + 1] = EnvID.WALL.value
+        self._env[h - 1] = EnvID.WALL.value
         self._env[:, 0] = EnvID.WALL.value
-        self._env[:, w + 1] = EnvID.WALL.value
+        self._env[:, w - 1] = EnvID.WALL.value
         for _ in range(self._N_RED):
-            self.spawn_obj(EnvID.APPLE_RED)
+            self._spawn_obj(EnvID.APPLE_RED)
         for _ in range(self._N_GREEN):
-            self.spawn_obj(EnvID.APPLE_GREEN)
+            self._spawn_obj(EnvID.APPLE_GREEN)
         self._init_snake()
         for _ in range(self._SNAKE_LEN):
             self._extend_snake()
@@ -114,7 +105,7 @@ class Environment:
         if not self._check_collision(EnvID.EMPTY):
             if self._check_collision(EnvID.APPLE_RED):
                 self._set_cell(self.snake[0][0], self.snake[0][1], EnvID.EMPTY)
-                self.spawn_obj(EnvID.APPLE_RED)
+                self._spawn_obj(EnvID.APPLE_RED)
                 self.snake = self.snake[:-1]
                 if self.snake.shape[0] == 0:
                     reward = QReward.DEAD
@@ -122,7 +113,7 @@ class Environment:
                     reward = QReward.LOSE
             elif self._check_collision(EnvID.APPLE_GREEN):
                 self._set_cell(self.snake[0][0], self.snake[0][1], EnvID.EMPTY)
-                self.spawn_obj(EnvID.APPLE_GREEN)
+                self._spawn_obj(EnvID.APPLE_GREEN)
                 self._extend_snake()
                 reward = QReward.GAIN
             elif self._check_collision(EnvID.WALL) or self._check_collision(
