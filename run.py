@@ -40,14 +40,15 @@ def run(
     save_to: str = None,
     n_episodes: int = 2000,
     epsilon_decay: float = 0.999,
+    lr: float = 0.001,
     verbose: bool = True,
     visual: bool = False,
     visual_refresh_rate: float = 200,
 ):
-    print(f"running {mode}")
+    print(f"running in {mode.name.lower()} mode")
     env: Environment = Environment(w, h)
     if load_from is None:
-        agent: Agent = Agent(lr=0.01, memory_size=1_000_000)
+        agent: Agent = Agent(lr=lr, memory_size=1_000_000)
     else:
         agent: Agent = load_agent(load_from)
     if mode == RunModes.PLAY:
@@ -92,6 +93,7 @@ def main():
         save_to=_get_arg_value("-save", None),
         n_episodes=int(_get_arg_value("-sessions", 2000)),
         epsilon_decay=float(_get_arg_value("-decay", 0.995)),
+        lr=float(_get_arg_value("-lr", 0.001)),
         verbose=_arg_to_value("-verbose", True, False),
         visual=_arg_to_value("-visual", True, False),
         visual_refresh_rate=int(_get_arg_value("-fpms", 50)),
