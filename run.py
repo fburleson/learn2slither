@@ -54,20 +54,25 @@ def run(
     if mode == RunModes.PLAY:
         play(env, agent, visual_refresh_rate=visual_refresh_rate)
     elif mode == RunModes.TRAIN:
-        train(
-            env,
-            agent,
-            n_episodes=n_episodes,
-            epsilon_decay=epsilon_decay,
-            epsilon_end=0.2,
-            discount=0.9,
-            batch_size=32,
-            min_memory_size=1024,
-            target_update_freq=100,
-            verbose=verbose,
-            visual=visual,
-            visual_refresh_rate=visual_refresh_rate,
-        )
+        try:
+            train(
+                env,
+                agent,
+                n_episodes=n_episodes,
+                epsilon_decay=epsilon_decay,
+                epsilon_end=0.2,
+                discount=0.9,
+                batch_size=32,
+                min_memory_size=1024,
+                target_update_freq=100,
+                verbose=verbose,
+                visual=visual,
+                visual_refresh_rate=visual_refresh_rate,
+            )
+        except KeyboardInterrupt:
+            should_save: bool = True if input("save model? (y/n): ") == "y" else False
+            if not should_save:
+                return
         if save_to is not None:
             agent.save(save_to)
     else:
