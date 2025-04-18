@@ -5,18 +5,18 @@ from torch import nn
 from torch import optim
 import numpy as np
 from env import Environment
-from defs import Action, QReward
+from defs import Action, QReward, EnvID
 
 
 class DQN(nn.Module):
     def __init__(self, state_size: int, n_actions: int):
         super().__init__()
         self.net: nn.Sequential = nn.Sequential(
-            nn.Linear(state_size, 64),
+            nn.Linear(state_size, 512),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(512, 512),
             nn.ReLU(),
-            nn.Linear(64, n_actions),
+            nn.Linear(512, n_actions),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -24,7 +24,7 @@ class DQN(nn.Module):
 
 
 class Agent:
-    def __init__(self, env: Environment, memory_size: int = 10_000, lr: float = 0.01):
+    def __init__(self, memory_size: int = 10_000, lr: float = 0.01):
         self._actions: tuple[Action] = (
             Action.UP,
             Action.DOWN,
@@ -37,24 +37,49 @@ class Agent:
             QReward.LOSE: -2,
             QReward.GAIN: 2,
         }
+        self._obs_map: dict = {
+            EnvID.WALL.value: 0,
+            EnvID.APPLE_RED.value: 1,
+            EnvID.APPLE_GREEN.value: 2,
+            EnvID.SNAKE_BODY.value: 3,
+        }
+        self._device = "cuda" if torch.cuda.is_available() else "cpu"
         self._transitions: deque = deque(maxlen=memory_size)
-        state_size: int = env.w + env.h + 4
-        self._net: DQN = DQN(state_size=state_size, n_actions=len(self._actions))
-        self._target_net: DQN = DQN(state_size=state_size, n_actions=len(self._actions))
-        self._optimizer: optim.Optimizer = optim.SGD(self._net.parameters(), lr=lr)
+        state_size: int = len(self._obs_map) * 4
+        self._net: DQN = DQN(state_size=state_size, n_actions=len(self._actions)).to(
+            self._device
+        )
+        self._target_net: DQN = DQN(
+            state_size=state_size, n_actions=len(self._actions)
+        ).to(self._device)
+        self._optimizer: optim.Optimizer = optim.Adam(self._net.parameters(), lr=lr)
         self.sync()
 
     def sync(self):
         self._target_net.load_state_dict(self._net.state_dict())
 
+    def _observe_dir(self, dir: np.ndarray) -> np.ndarray:
+        dir_obs: np.ndarray = np.zeros(len(self._obs_map), dtype=int)
+        for cell in dir:
+            if cell != EnvID.EMPTY.value:
+                dir_obs[self._obs_map[cell]] = 1
+                return dir_obs
+
     def observe(self, env: Environment) -> torch.Tensor:
         state: np.ndarray = env.get_env()
         head: np.ndarray = env.snake[0]
-        horizontal: np.ndarray = state[head[1]]
-        vertical: np.ndarray = np.array(
-            [env.get_cell(head[0], y) for y in range(env.h + 2)]
-        )
-        return torch.as_tensor([*horizontal, *vertical], dtype=torch.float32)
+        left: np.ndarray = state[head[1]][: head[0]][::-1]
+        right: np.ndarray = state[head[1]][head[0] + 1 :]
+        up: np.ndarray = state[:, head[0]][: head[1]][::-1]
+        down: np.ndarray = state[:, head[0]][head[1] + 1 :]
+        obs_left: np.ndarray = self._observe_dir(left)
+        obs_right: np.ndarray = self._observe_dir(right)
+        obs_up: np.ndarray = self._observe_dir(up)
+        obs_down: np.ndarray = self._observe_dir(down)
+        return torch.as_tensor(
+            np.concatenate((obs_left, obs_right, obs_up, obs_down), axis=None),
+            dtype=torch.float32,
+        ).to(self._device)
 
     def policy_greedy(self, obs: torch.Tensor) -> Action:
         return self._actions[torch.argmax(self._net.forward(obs))]
@@ -63,6 +88,9 @@ class Agent:
         if random.random() < epsilon:
             return random.choice(self._actions)
         return self.policy_greedy(obs)
+
+    def n_transitions(self) -> int:
+        return len(self._transitions)
 
     def store_transition(
         self,
@@ -86,10 +114,10 @@ class Agent:
         )
         batch = (
             torch.stack(obs),
-            torch.LongTensor(actions),
-            torch.IntTensor(rewards),
+            torch.LongTensor(actions).to(self._device),
+            torch.IntTensor(rewards).to(self._device),
             torch.stack(next_obs),
-            torch.IntTensor(is_terminal),
+            torch.IntTensor(is_terminal).to(self._device),
         )
         q_target: torch.Tensor = self._target_net.forward(batch[3]).max(
             dim=1, keepdims=True
