@@ -94,6 +94,7 @@ class Environment:
 
     def step(self, action: Action) -> int:
         reward: QReward = QReward.OK
+        spawn_obj: EnvID = None
         self._update_snake_body()
         if action == action.UP:
             self.snake[0] += np.array([0, -1])
@@ -106,7 +107,7 @@ class Environment:
         if not self._check_collision(EnvID.EMPTY):
             if self._check_collision(EnvID.APPLE_RED):
                 self._set_cell(self.snake[0][0], self.snake[0][1], EnvID.EMPTY)
-                self._spawn_obj(EnvID.APPLE_RED)
+                spawn_obj = EnvID.APPLE_RED
                 self.snake = self.snake[:-1]
                 if self.snake.shape[0] == 0:
                     reward = QReward.DEAD
@@ -114,7 +115,7 @@ class Environment:
                     reward = QReward.LOSE
             elif self._check_collision(EnvID.APPLE_GREEN):
                 self._set_cell(self.snake[0][0], self.snake[0][1], EnvID.EMPTY)
-                self._spawn_obj(EnvID.APPLE_GREEN)
+                spawn_obj = EnvID.APPLE_GREEN
                 self._extend_snake()
                 reward = QReward.GAIN
             elif self._check_collision(EnvID.WALL) or self._check_collision(
@@ -122,4 +123,6 @@ class Environment:
             ):
                 reward = QReward.DEAD
         self._snake_to_env()
+        if spawn_obj is not None:
+            self._spawn_obj(spawn_obj)
         return reward
