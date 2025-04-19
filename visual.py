@@ -6,17 +6,17 @@ from defs import EnvID
 
 def _env_to_color(env: int):
     if env == EnvID.EMPTY.value:
-        return np.array([0, 0, 0])
+        return np.array([26, 24, 27])
     if env == EnvID.WALL.value:
-        return np.array([80, 80, 80])
+        return np.array([42, 38, 43])
     if env == EnvID.APPLE_RED.value:
-        return np.array([255, 0, 0])
+        return np.array([219, 43, 57])
     if env == EnvID.APPLE_GREEN.value:
-        return np.array([0, 255, 0])
+        return np.array([60, 226, 184])
     if env == EnvID.SNAKE_HEAD.value:
-        return np.array([0, 0, 255])
+        return np.array([56, 92, 250])
     if env == EnvID.SNAKE_BODY.value:
-        return np.array([0, 0, 180])
+        return np.array([77, 108, 250])
 
 
 def _render_env(scale: int, env: Environment) -> pygame.Surface:
