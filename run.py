@@ -62,6 +62,7 @@ def run(
     verbose: bool = True,
     visual: bool = False,
     visual_refresh_rate: float = 200,
+    visual_scale: int = 10,
     stepbystep: bool = False,
 ):
     print(f"running in {mode.name.lower()} mode")
@@ -76,6 +77,7 @@ def run(
                 env,
                 agent,
                 visual_refresh_rate=visual_refresh_rate,
+                visual_scale=visual_scale,
                 stepbystep=stepbystep,
                 verbose=verbose,
             )
@@ -96,6 +98,7 @@ def run(
                 target_update_freq=10,
                 verbose=verbose,
                 visual=visual,
+                visual_scale=visual_scale,
                 visual_refresh_rate=visual_refresh_rate,
                 stepbystep=stepbystep,
             )
@@ -133,6 +136,7 @@ def main():
         verbose=_arg_to_value("-verbose", True, False),
         visual=_arg_to_value("-visual", True, False),
         visual_refresh_rate=int(_get_arg_value("-fpms", 50)),
+        visual_scale=int(_get_arg_value("-scale", 10)),
         stepbystep=_arg_to_value("-stepbystep", True, False),
     )
 
