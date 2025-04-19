@@ -34,6 +34,9 @@ def play(
                 run = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
+                    print(
+                        f"game over - max length={max_length} - length={env.snake.shape[0]}"
+                    )
                     env.reset(env.w, env.h)
                     max_length = env.snake.shape[0]
 
@@ -46,6 +49,7 @@ def run(
     save_to: str = None,
     n_episodes: int = 2000,
     epsilon_decay: float = 0.999,
+    batch_size: int = 32,
     lr: float = 0.001,
     verbose: bool = True,
     visual: bool = False,
@@ -60,6 +64,7 @@ def run(
     if mode == RunModes.PLAY:
         play(env, agent, visual_refresh_rate=visual_refresh_rate)
     elif mode == RunModes.TRAIN:
+        print("training model...")
         try:
             train(
                 env,
@@ -68,9 +73,9 @@ def run(
                 epsilon_decay=epsilon_decay,
                 epsilon_end=0.2,
                 discount=0.9,
-                batch_size=32,
+                batch_size=batch_size,
                 min_memory_size=1024,
-                target_update_freq=100,
+                target_update_freq=10,
                 verbose=verbose,
                 visual=visual,
                 visual_refresh_rate=visual_refresh_rate,
@@ -104,6 +109,7 @@ def main():
         save_to=_get_arg_value("-save", None),
         n_episodes=int(_get_arg_value("-sessions", 2000)),
         epsilon_decay=float(_get_arg_value("-decay", 0.995)),
+        batch_size=int(_get_arg_value("-batch", 32)),
         lr=float(_get_arg_value("-lr", 0.001)),
         verbose=_arg_to_value("-verbose", True, False),
         visual=_arg_to_value("-visual", True, False),
