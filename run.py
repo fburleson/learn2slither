@@ -12,6 +12,7 @@ def play(
     agent: Agent,
     visual_refresh_rate: int = 200,
     visual_scale: int = 10,
+    stepbystep: bool = False,
 ):
     screen: pygame.Surface = init_display(env, visual_scale)
     run: bool = True
@@ -26,7 +27,11 @@ def play(
             env.reset(env.w, env.h)
             max_length = env.snake.shape[0]
         if not render_env_to_screen(
-            screen, env, refresh_rate=visual_refresh_rate, scale=visual_scale
+            screen,
+            env,
+            refresh_rate=visual_refresh_rate,
+            scale=visual_scale,
+            stepbystep=stepbystep,
         ):
             run = False
         for event in pygame.event.get():
@@ -54,6 +59,7 @@ def run(
     verbose: bool = True,
     visual: bool = False,
     visual_refresh_rate: float = 200,
+    stepbystep: bool = False,
 ):
     print(f"running in {mode.name.lower()} mode")
     env: Environment = Environment(w, h)
@@ -63,7 +69,12 @@ def run(
         agent: Agent = load_agent(load_from)
     if mode == RunModes.PLAY:
         try:
-            play(env, agent, visual_refresh_rate=visual_refresh_rate)
+            play(
+                env,
+                agent,
+                visual_refresh_rate=visual_refresh_rate,
+                stepbystep=stepbystep,
+            )
         except KeyboardInterrupt:
             return
     elif mode == RunModes.TRAIN:
@@ -82,6 +93,7 @@ def run(
                 verbose=verbose,
                 visual=visual,
                 visual_refresh_rate=visual_refresh_rate,
+                stepbystep=stepbystep,
             )
         except KeyboardInterrupt:
             should_save: bool = True if input("save model? (y/n): ") == "y" else False
@@ -117,6 +129,7 @@ def main():
         verbose=_arg_to_value("-verbose", True, False),
         visual=_arg_to_value("-visual", True, False),
         visual_refresh_rate=int(_get_arg_value("-fpms", 50)),
+        stepbystep=_arg_to_value("-stepbystep", True, False),
     )
 
 

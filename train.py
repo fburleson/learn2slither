@@ -28,6 +28,7 @@ def train(
     visual: bool = False,
     visual_refresh_rate: int = 200,
     visual_scale: int = 10,
+    stepbystep: bool = False,
     verbose: bool = False,
 ):
     if visual:
@@ -40,7 +41,11 @@ def train(
         if agent.n_transitions() >= min_memory_size:
             if visual:
                 if not render_env_to_screen(
-                    screen, env, refresh_rate=visual_refresh_rate, scale=visual_scale
+                    screen,
+                    env,
+                    refresh_rate=visual_refresh_rate,
+                    scale=visual_scale,
+                    stepbystep=stepbystep,
                 ):
                     return
             agent.update_step(batch_size, discount)

@@ -35,7 +35,11 @@ def init_display(env: Environment, scale: int = 10) -> pygame.Surface:
 
 
 def render_env_to_screen(
-    screen: pygame.Surface, env: Environment, refresh_rate: int = 200, scale: int = 10
+    screen: pygame.Surface,
+    env: Environment,
+    refresh_rate: int = 200,
+    scale: int = 10,
+    stepbystep: bool = False,
 ) -> bool:
     screen.fill((0, 0, 0))
     for event in pygame.event.get():
@@ -44,5 +48,16 @@ def render_env_to_screen(
     render: pygame.Surface = _render_env(scale, env)
     screen.blit(render, (0, 0))
     pygame.display.flip()
-    pygame.time.wait(refresh_rate)
+    if stepbystep:
+        paused: bool = True
+        while paused:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        paused = False
+                        break
+    else:
+        pygame.time.wait(refresh_rate)
     return True
