@@ -13,6 +13,7 @@ def play(
     visual_refresh_rate: int = 200,
     visual_scale: int = 10,
     stepbystep: bool = False,
+    verbose: bool = False,
 ):
     screen: pygame.Surface = init_display(env, visual_scale)
     run: bool = True
@@ -26,6 +27,8 @@ def play(
             print(f"game over - max length={max_length} - length={env.snake.shape[0]}")
             env.reset(env.w, env.h)
             max_length = env.snake.shape[0]
+        if verbose:
+            print(action)
         if not render_env_to_screen(
             screen,
             env,
@@ -74,6 +77,7 @@ def run(
                 agent,
                 visual_refresh_rate=visual_refresh_rate,
                 stepbystep=stepbystep,
+                verbose=verbose,
             )
         except KeyboardInterrupt:
             return
