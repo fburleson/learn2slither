@@ -28,6 +28,7 @@ def play(
             env.reset(env.w, env.h)
             max_length = env.snake.shape[0]
         if verbose:
+            print(obs.cpu().numpy())
             print(action)
         if not render_env_to_screen(
             screen,
