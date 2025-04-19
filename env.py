@@ -4,8 +4,8 @@ from defs import EnvID, QReward, Action
 
 class Environment:
     def __init__(self, w: int, h: int) -> None:
-        self._N_RED = 2
-        self._N_GREEN = 1
+        self._N_RED = 1
+        self._N_GREEN = 2
         self._SNAKE_LEN = 2
         self.w = w
         self.h = h
