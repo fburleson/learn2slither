@@ -13,9 +13,9 @@ class DQN(nn.Module):
     def __init__(self, state_size: int, n_actions: int):
         super().__init__()
         self.net: nn.Sequential = nn.Sequential(
-            nn.Linear(state_size, 64),
+            nn.Linear(state_size, 256),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(256, 64),
             nn.ReLU(),
             nn.Linear(64, n_actions),
         )

@@ -62,7 +62,10 @@ def run(
     else:
         agent: Agent = load_agent(load_from)
     if mode == RunModes.PLAY:
-        play(env, agent, visual_refresh_rate=visual_refresh_rate)
+        try:
+            play(env, agent, visual_refresh_rate=visual_refresh_rate)
+        except KeyboardInterrupt:
+            return
     elif mode == RunModes.TRAIN:
         print("training model...")
         try:
