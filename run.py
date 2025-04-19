@@ -15,11 +15,16 @@ def play(
 ):
     screen: pygame.Surface = init_display(env, visual_scale)
     run: bool = True
+    max_length: int = env.snake.shape[0]
     while run:
         obs = agent.observe(env)
         action = agent.policy_greedy(obs)
+        if env.snake.shape[0] > max_length:
+            max_length = env.snake.shape[0]
         if env.step(action) == QReward.DEAD:
+            print(f"game over - max length={max_length} - length={env.snake.shape[0]}")
             env.reset(env.w, env.h)
+            max_length = env.snake.shape[0]
         if not render_env_to_screen(
             screen, env, refresh_rate=visual_refresh_rate, scale=visual_scale
         ):
@@ -30,6 +35,7 @@ def play(
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     env.reset(env.w, env.h)
+                    max_length = env.snake.shape[0]
 
 
 def run(
