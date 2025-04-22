@@ -24,5 +24,5 @@ pip3 install -e .
 
 ## :computer: Usage
 ```bash
-python3 run.py
+python3 run.py -load models/agent_1000sess.agt
 ```
