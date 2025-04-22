@@ -21,6 +21,8 @@ python3 -m venv .venv
 .\.venv\Scripts\activate 
 pip3 install -e .
 ```
+>[!NOTE]
+>The installation of pytorch may take a long time
 
 ## :computer: Usage
 ```bash
