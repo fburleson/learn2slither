@@ -55,8 +55,8 @@ class Agent:
 
     def to_device(self, device: str) -> None:
         self._device = device
-        self._net.to(self._device)
-        self._target_net.to(self._device)
+        self._net = self._net.to(self._device)
+        self._target_net = self._target_net.to(self._device)
 
     def sync(self):
         self._target_net.load_state_dict(self._net.state_dict())
