@@ -51,10 +51,10 @@ class Agent:
         self._target_net: DQN = DQN(state_size=state_size, n_actions=len(self._actions))
         self._optimizer: optim.Optimizer = optim.Adam(self._net.parameters(), lr=lr)
         self.sync()
-        self.init_device()
+        self.to_device("cuda" if torch.cuda.is_available() else "cpu")
 
-    def init_device(self) -> None:
-        self._device = "cuda" if torch.cuda.is_available() else "cpu"
+    def to_device(self, device: str) -> None:
+        self._device = device
         self._net.to(self._device)
         self._target_net.to(self._device)
 
@@ -138,6 +138,7 @@ class Agent:
         self._optimizer.step()
 
     def save(self, file_name: str):
+        self.to_device("cpu")
         with open(file_name, "wb") as file:
             pickle.dump(self, file)
         print(f"saved agent as {file_name}")
@@ -146,6 +147,6 @@ class Agent:
 def load_agent(file_name: str) -> Agent:
     with open(file_name, "rb") as file:
         agent: Agent = pickle.load(file)
-    agent.init_device()
+    agent.to_device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"loaded agent from {file_name}")
     return agent
