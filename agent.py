@@ -57,6 +57,7 @@ class Agent:
         self._device = device
         self._net = self._net.to(self._device)
         self._target_net = self._target_net.to(self._device)
+        print(f"moved device to {self._device}")
 
     def sync(self):
         self._target_net.load_state_dict(self._net.state_dict())
@@ -138,15 +139,20 @@ class Agent:
         self._optimizer.step()
 
     def save(self, file_name: str):
-        self.to_device("cpu")
-        with open(file_name, "wb") as file:
-            pickle.dump(self, file)
+        save_data = {
+            "state_online_net": self._net.state_dict(),
+            "state_target_net": self._target_net.state_dict(),
+        }
+        torch.save(save_data, f"{file_name}")
         print(f"saved agent as {file_name}")
+
+    def load(self, file_name: str):
+        data = torch.load(file_name, map_location=self._device)
+        self._net.load_state_dict(data["state_online_net"])
+        self._target_net.load_state_dict(data["state_target_net"])
 
 
 def load_agent(file_name: str) -> Agent:
-    with open(file_name, "rb") as file:
-        agent: Agent = pickle.load(file)
-    agent.to_device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"loaded agent from {file_name}")
+    agent: Agent = Agent()
+    agent.load(file_name)
     return agent
