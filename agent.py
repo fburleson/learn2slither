@@ -44,17 +44,19 @@ class Agent:
             EnvID.APPLE_GREEN.value: 2,
             EnvID.SNAKE_BODY.value: 3,
         }
-        self._device = "cuda" if torch.cuda.is_available() else "cpu"
+        self._device = "cpu"
         self._transitions: deque = deque(maxlen=memory_size)
         state_size: int = len(self._obs_map) * 4
-        self._net: DQN = DQN(state_size=state_size, n_actions=len(self._actions)).to(
-            self._device
-        )
-        self._target_net: DQN = DQN(
-            state_size=state_size, n_actions=len(self._actions)
-        ).to(self._device)
+        self._net: DQN = DQN(state_size=state_size, n_actions=len(self._actions))
+        self._target_net: DQN = DQN(state_size=state_size, n_actions=len(self._actions))
         self._optimizer: optim.Optimizer = optim.Adam(self._net.parameters(), lr=lr)
         self.sync()
+        self.init_device()
+
+    def init_device(self) -> None:
+        self._device = "cuda" if torch.cuda.is_available() else "cpu"
+        self._net.to(self._device)
+        self._target_net.to(self._device)
 
     def sync(self):
         self._target_net.load_state_dict(self._net.state_dict())
@@ -144,5 +146,6 @@ class Agent:
 def load_agent(file_name: str) -> Agent:
     with open(file_name, "rb") as file:
         agent: Agent = pickle.load(file)
+    agent.init_device()
     print(f"loaded agent from {file_name}")
     return agent
