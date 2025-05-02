@@ -24,7 +24,9 @@ def play(
         if env.snake.shape[0] > max_length:
             max_length = env.snake.shape[0]
         if env.step(action) == QReward.DEAD:
-            print(f"game over - max length={max_length} - length={env.snake.shape[0]}")
+            print(
+                f"game over - max length={max_length} - "
+                f"length={env.snake.shape[0]}")
             env.reset(env.w, env.h)
             max_length = env.snake.shape[0]
         if verbose:
@@ -44,7 +46,8 @@ def play(
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     print(
-                        f"game over - max length={max_length} - length={env.snake.shape[0]}"
+                        f"game over - max length={max_length} - "
+                        f"length={env.snake.shape[0]}"
                     )
                     env.reset(env.w, env.h)
                     max_length = env.snake.shape[0]
@@ -104,7 +107,8 @@ def run(
                 stepbystep=stepbystep,
             )
         except KeyboardInterrupt:
-            should_save: bool = True if input("save model? (y/n): ") == "y" else False
+            should_save: bool = True if input(
+                "save model? (y/n): ") == "y" else False
             if not should_save:
                 return
         if save_to is not None:

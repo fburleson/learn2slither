@@ -2,7 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name="learn2slither",
-    description="A AI agent trained to play the game snake. Train your own snake or test a pre-trained one.",
+    description="A AI agent trained to play the game snake. "
+    "Train your own snake or test a pre-trained one.",
     long_description=open("README.md").read(),
     packages=find_packages(),
     version="1.0.0",

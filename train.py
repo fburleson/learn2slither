@@ -36,7 +36,8 @@ def train(
     iteration: int = 0
     current_episode: int = 0
     while current_episode < n_episodes:
-        obs, action, reward, next_obs, is_terminal = transition(env, agent, epsilon)
+        obs, action, reward, next_obs, is_terminal = transition(
+            env, agent, epsilon)
         agent.store_transition(obs, action, reward, next_obs, is_terminal)
         if agent.n_transitions() >= min_memory_size:
             if visual:
@@ -59,5 +60,6 @@ def train(
             iteration += 1
             if verbose:
                 print(
-                    f"episode={current_episode} iteration={iteration} epsilon={epsilon}"
+                    f"episode={current_episode} "
+                    f"iteration={iteration} epsilon={epsilon}"
                 )

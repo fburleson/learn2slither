@@ -49,9 +49,8 @@ class Environment:
         np.random.shuffle(self._dirs)
         for dir in self._dirs:
             next: np.ndarray = self.snake[-1] + dir
-            if self._is_available_cell(next[0], next[1]) and not self._is_in_snake(
-                next[0], next[1]
-            ):
+            if self._is_available_cell(next[0], next[1]) and (
+                    not self._is_in_snake(next[0], next[1])):
                 self.snake = np.append(self.snake, [next], axis=0)
                 return
 
@@ -63,7 +62,8 @@ class Environment:
             self._env == EnvID.SNAKE_HEAD.value, EnvID.EMPTY.value, self._env
         )
         if self.snake.shape[0] != 0:
-            self._set_cell(self.snake[0][0], self.snake[0][1], EnvID.SNAKE_HEAD)
+            self._set_cell(self.snake[0][0],
+                           self.snake[0][1], EnvID.SNAKE_HEAD)
         for body_segment in self.snake[1:]:
             self._set_cell(body_segment[0], body_segment[1], EnvID.SNAKE_BODY)
 

@@ -1,5 +1,4 @@
 import random
-import pickle
 from collections import deque
 import torch
 from torch import nn
@@ -47,9 +46,12 @@ class Agent:
         self._device = "cpu"
         self._transitions: deque = deque(maxlen=memory_size)
         state_size: int = len(self._obs_map) * 4
-        self._net: DQN = DQN(state_size=state_size, n_actions=len(self._actions))
-        self._target_net: DQN = DQN(state_size=state_size, n_actions=len(self._actions))
-        self._optimizer: optim.Optimizer = optim.Adam(self._net.parameters(), lr=lr)
+        self._net: DQN = DQN(state_size=state_size,
+                             n_actions=len(self._actions))
+        self._target_net: DQN = DQN(
+            state_size=state_size, n_actions=len(self._actions))
+        self._optimizer: optim.Optimizer = optim.Adam(
+            self._net.parameters(), lr=lr)
         self.sync()
         self.to_device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -74,9 +76,9 @@ class Agent:
         state: np.ndarray = env.get_env()
         head: np.ndarray = env.snake[0]
         left: np.ndarray = state[head[1]][: head[0]][::-1]
-        right: np.ndarray = state[head[1]][head[0] + 1 :]
+        right: np.ndarray = state[head[1]][head[0] + 1:]
         up: np.ndarray = state[:, head[0]][: head[1]][::-1]
-        down: np.ndarray = state[:, head[0]][head[1] + 1 :]
+        down: np.ndarray = state[:, head[0]][head[1] + 1:]
         obs_left: np.ndarray = self._observe_dir(left)
         obs_right: np.ndarray = self._observe_dir(right)
         obs_up: np.ndarray = self._observe_dir(up)
@@ -89,7 +91,11 @@ class Agent:
     def policy_greedy(self, obs: torch.Tensor) -> Action:
         return self._actions[torch.argmax(self._net.forward(obs))]
 
-    def policy_epsilon_greedy(self, obs: torch.Tensor, epsilon: float = 0.1) -> Action:
+    def policy_epsilon_greedy(
+        self,
+        obs: torch.Tensor,
+        epsilon: float = 0.1,
+    ) -> Action:
         if random.random() < epsilon:
             return random.choice(self._actions)
         return self.policy_greedy(obs)
@@ -127,9 +133,10 @@ class Agent:
         q_target: torch.Tensor = self._target_net.forward(batch[3]).max(
             dim=1, keepdims=True
         )[0]
-        targets: torch.Tensor = batch[2].unsqueeze(-1) + discount * q_target * (
-            1 - batch[4].unsqueeze(-1)
-        )
+        targets: torch.Tensor = batch[2].unsqueeze(-1) + discount * (
+            q_target * (
+                1 - batch[4].unsqueeze(-1)
+            ))
         action_q_values: torch.Tensor = torch.gather(
             self._net.forward(batch[0]), 1, batch[1].unsqueeze(-1)
         )
